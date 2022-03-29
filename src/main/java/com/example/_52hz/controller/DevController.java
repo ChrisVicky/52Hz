@@ -6,6 +6,7 @@ package com.example._52hz.controller;
  * @year 2022
  */
 
+import com.example._52hz.service.LogService;
 import com.example._52hz.util.APIResponse;
 import com.example._52hz.util.ErrorCode;
 import com.example._52hz.util.IpHelper;
@@ -30,6 +31,9 @@ public class DevController {
     @Resource
     HttpServletRequest httpServletRequest;
 
+    @Resource
+    LogService logService;
+
     @GetMapping("/dev/ip")
     public APIResponse getIpAddress(){
 
@@ -44,7 +48,6 @@ public class DevController {
 
     @PostMapping("/dev/token/login")
     public APIResponse tokenLogin(@RequestParam("token") String token) throws IOException {
-
-
+        return logService.tokenLogin(token);
     }
 }

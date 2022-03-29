@@ -1,10 +1,14 @@
 package com.example._52hz.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.example._52hz.config.RestTemplateConfig;
 import com.example._52hz.service.LogService;
 import com.example._52hz.util.APIResponse;
+import com.example._52hz.util.ErrorCode;
 import com.example._52hz.util.TwtLoginResponse;
 import com.example._52hz.util.TwtUser;
+import okhttp3.*;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -61,23 +65,31 @@ public class LogServiceImpl implements LogService {
     public APIResponse tokenLogin(String token){
         lock.lock();
         try{
-            MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-            map.add("token", token);
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("ticket", RestTemplateConfig.getTicket());
-            headers.set("domain", RestTemplateConfig.getDomain());
-            TwtLoginResponse response = restTemplate.postForObject("https://api.twt.edu.cn/api/user/single"
-                    , new HttpEntity<>(map, headers), TwtLoginResponse.class, map);
-            if(response.getError_code() == 0){
-                TwtUser twtUser = getTwtUserFromMap((LinkedHashMap<String, String>) response.getResult());
-                String userNumber = twtUser.getUserNumber();
-                int grade = 2000 + (userNumber.charAt(2) - '0') * 10 + (userNumber.charAt(3) - '0');
 
-                // 获取当前时间
-                Date date = new Date();
-                SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            OkHttpClient client = new OkHttpClient().newBuilder().build();
 
-            }
+            Request request =
+                    new Request.Builder()
+                            .url(RestTemplateConfig.getSingle_url())
+                            .addHeader("domain", RestTemplateConfig.getDomain())
+                            .addHeader("ticket", RestTemplateConfig.getTicket())
+                            .addHeader("token", token)
+                            .build();
+
+            Response response = client.newCall(request).execute();
+            String body = response.body().string();
+            System.out.println(body);
+            JSONObject jsonObject = JSONObject.parseObject(body).getJSONObject("result");
+            System.out.println(jsonObject);
+            response.close();
+            TwtUser twtUser = JSON.toJavaObject(jsonObject, TwtUser.class);
+//            System.out.println(twtUser.getRealname());
+            return APIResponse.success(twtUser);
+        }catch (Exception e){
+            e.printStackTrace();
+            return APIResponse.error(ErrorCode.SERVICE_ERROR);
+        }finally {
+            lock.unlock();
         }
     }
 }

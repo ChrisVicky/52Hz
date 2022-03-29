@@ -13,7 +13,9 @@ import lombok.*;
 @Getter
 public enum ErrorCode {
     OK(0, "Success"),
-    IP_ERROR(1001, "Get Ip Error");
+    IP_ERROR(1001, "Get Ip Error"),
+    LOGIN_ERROR(1002, "Log in Error"),
+    SERVICE_ERROR(5000, "Service Error");
     private int code;
     private String msg;
 }
