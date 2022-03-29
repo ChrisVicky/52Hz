@@ -11,10 +11,13 @@ import com.example._52hz.util.ErrorCode;
 import com.example._52hz.util.IpHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 /**
  * @program: _52Hz
@@ -37,5 +40,11 @@ public class DevController {
         }else{
             return APIResponse.error(ErrorCode.IP_ERROR);
         }
+    }
+
+    @PostMapping("/dev/token/login")
+    public APIResponse tokenLogin(@RequestParam("token") String token) throws IOException {
+
+
     }
 }
