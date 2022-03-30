@@ -1,22 +1,21 @@
 package com.example._52hz.dao;
 
 import com.example._52hz.entity.User;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
+@Mapper
+//@Component
 public interface UserMapper {
     @Select("SELECT * FROM user WHERE stu_number = #{stu_number};")
     List<User> getUserByStuNumber(@Param("stu_number") String stu_number);
 
     // Newly Inserted User has no QQ AND Wechat because they were not Contained in the Original Database;
-    @Insert("INSERT INTO user (`stu_number`, `u_name`, `grade`, `gender`, `phone`, `email`,  `created_at`, `updated_at`, `is_deleted`)" +
-            "VALUES (#{stu_number}, #{u_name}, #{grade}, #{gender}, #{phone}, #{email},  #{created_at}, #{updated_at}, #{is_deleted})")
+    @Insert("INSERT INTO user (`stu_number`, `u_name`, `grade`, `gender`, `phone`, `email`,  `created_at`, `updated_at`, `major`, `department`, `campus`, `is_deleted`)" +
+            "VALUES (#{stu_number}, #{u_name}, #{grade}, #{gender}, #{phone}, #{email},  #{created_at}, #{updated_at}, #{major}, #{department}, #{campus},  #{is_deleted})")
     void insertNewUser(@Param("stu_number") String stu_number,  @Param("u_name") String u_name,
                        @Param("grade") String grade,            @Param("gender") String gender,
                        @Param("phone") String phone,            @Param("email") String email,

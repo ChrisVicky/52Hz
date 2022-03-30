@@ -11,6 +11,7 @@ import com.example._52hz.util.ErrorCode;
 import com.example._52hz.util.TwtLoginResponse;
 import com.example._52hz.util.TwtUser;
 import okhttp3.*;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.jdbc.Null;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import tk.mybatis.mapper.genid.GenId;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -65,7 +67,6 @@ public class LogServiceImpl implements LogService {
             String body = response.body().string();
             JSONObject jsonObject = JSONObject.parseObject(body).getJSONObject("result");
             response.close();
-
             // String --> to Json  --> to TwtUser
             return JSON.toJavaObject(jsonObject, TwtUser.class);
         }catch (Exception e){
@@ -73,10 +74,10 @@ public class LogServiceImpl implements LogService {
         }
     }
 
-    private void loadUser(TwtUser twtUser){
+    private User loadUser(TwtUser twtUser){
         List<User> userList = userMapper.getUserByStuNumber(twtUser.getUserNumber());
         // convert into grade
-        String grade = twtUser.getStuType().substring(1,1) + "20" + (twtUser.getUserNumber().substring(2,3));
+        String grade = twtUser.getStuType().charAt(0) + "20" + (twtUser.getUserNumber().substring(2,4));
         // convert Date
         Date date = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -97,7 +98,9 @@ public class LogServiceImpl implements LogService {
                     twtUser.getEmail(), grade,
                     twtUser.getUserNumber(), ft.format(date));
         }
+        return userMapper.getUserByStuNumber(twtUser.getUserNumber()).get(0);
     }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
@@ -113,6 +116,82 @@ public class LogServiceImpl implements LogService {
             loadUser(twtUser);
 
             return APIResponse.success(userMapper.getUserByStuNumber(twtUser.getUserNumber()));
+        }catch (Exception e){
+            e.printStackTrace();
+            return APIResponse.error(ErrorCode.SERVICE_ERROR);
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    private TwtLoginResponse postLogin(String account, String password){
+        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+        map.add("account", account);
+        map.add("password", password);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("ticket", RestTemplateConfig.getTicket());
+        headers.set("domain", RestTemplateConfig.getDomain());
+        TwtLoginResponse response = restTemplate.postForObject(
+                RestTemplateConfig.getPost_url(),
+                new HttpEntity<>(map, headers),
+                TwtLoginResponse.class,
+                map);
+        return response;
+    }
+
+    // Get User Information From Request
+    private TwtUser getTwtUserFromMap(LinkedHashMap<String, String> map) {
+
+        TwtUser user = new TwtUser();
+        user.setUserNumber(map.get("userNumber"));
+        user.setEmail(map.get("email"));
+        user.setGender(map.get("gender"));
+        user.setIdNumber(map.get("idNumber"));
+        user.setMajor(map.get("major"));
+        user.setNickname(map.get("nickname"));
+        user.setRealname(map.get("realname"));
+        user.setRole(map.get("role"));
+        user.setStuType(map.get("stuType"));
+        user.setTelephone(map.get("telephone"));
+        user.setToken(map.get("token"));
+        user.setAvatar(map.get("avatar"));
+        user.setCampus(map.get("campus"));
+        user.setDepartment(map.get("department"));
+        return user;
+    }
+
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    public APIResponse classicLogin(String account, String password, HttpSession httpSession){
+        lock.lock();
+        try{
+            TwtLoginResponse response = postLogin(account, password);
+            if(response.getError_code()==0){
+
+                // CORRECT!
+                TwtUser twtUser = getTwtUserFromMap((LinkedHashMap<String, String>) response.getResult());
+                User user = loadUser(twtUser);
+                httpSession.setAttribute("user", user);
+                return APIResponse.success(user);
+
+            }else if (response.getError_code() == 40001) {
+
+                return APIResponse.error(ErrorCode.LOGIN_ERROR);
+
+            } else if (response.getError_code() == 40002) {
+
+                return APIResponse.error(ErrorCode.NO_SUCH_USER);
+
+            } else if (response.getError_code() == 40004) {
+
+                return APIResponse.error(ErrorCode.PASSWORD_ERROR);
+
+            } else
+
+                return APIResponse.error(response.getError_code(), response.getMessage());
+
         }catch (Exception e){
             e.printStackTrace();
             return APIResponse.error(ErrorCode.SERVICE_ERROR);

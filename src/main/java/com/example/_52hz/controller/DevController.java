@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
@@ -50,4 +51,13 @@ public class DevController {
     public APIResponse tokenLogin(@RequestParam("token") String token) throws IOException {
         return logService.tokenLogin(token);
     }
+
+    @PostMapping("/dev/classic/login")
+    public APIResponse login(@RequestParam("account") String account,
+                             @RequestParam("password") String password,
+                             HttpSession httpSession) throws IOException{
+        return logService.classicLogin(account, password, httpSession);
+    }
+
+
 }
