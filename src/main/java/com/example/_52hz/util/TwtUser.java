@@ -24,8 +24,8 @@ public class TwtUser {
     private String department;
     private String major;
     private String stuType;
-    private String campus;
 
+    private String campus;
     private String idNumber;
     private String avatar;
     private String role;

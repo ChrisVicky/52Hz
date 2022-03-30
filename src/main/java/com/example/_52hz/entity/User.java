@@ -33,6 +33,11 @@ public class User {
     private String created_at; /* datetime */
     private String updated_at; /* timestamp */
 
+    private String major;
+    private String department;
+    private String campus;
+
     private Integer is_deleted; /* default 0 */
+
 
 }
