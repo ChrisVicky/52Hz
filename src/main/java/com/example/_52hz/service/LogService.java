@@ -9,7 +9,7 @@ import javax.servlet.http.HttpSession;
  * @version 1.0
  */
 public interface LogService {
-    APIResponse tokenLogin(String token);
+    APIResponse tokenLogin(String token, HttpSession httpSession);
 
     APIResponse classicLogin(String account, String password, HttpSession httpSession);
 }

@@ -26,7 +26,15 @@ public enum ErrorCode {
     NO_SUCH_USER(1003, "No Such User"),
     PASSWORD_ERROR(1004, "Password Error"),
     NOT_LOGIN_YET(1005,"Not Login Yet. Please Login first"),
+    MULTIPLE_USER(1006,"Multiple Users share the same student number --> Please Contact Manager for Correction."),
+    ADD_CONFESSION_ERROR(3000,"Add Confession Failed"),
+    DELETE_CONFESSION_ERROR(3001,"Delete Confession Failed"),
+    UPDATE_CONFESSION_ERROR(3002,"Update Confession Failed"),
+    USER_SEARCH_ERROR(3003,"User Search Error"),
     SERVICE_ERROR(5000, "Service Error"),
+    NO_CONFESSION_ERROR(5001,"User No Confession Error"),
+    MATCHED_NULL_USER_ERROR(5002,"信息提供有错或对方未注册"),
+    MATCHED_MULTIPLE_USERS_ERROR(5003,"信息有误或不够准确导致匹配到多个对象"),
     TOKEN_LOGIN_ERROR(6001,"This token may no longer in used, Login with token Failed");
     private int code;
     private String msg;

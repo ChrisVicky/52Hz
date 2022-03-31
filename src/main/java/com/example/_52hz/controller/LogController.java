@@ -29,8 +29,9 @@ public class LogController {
     HttpServletRequest httpServletRequest;
 
     @PostMapping("/api/token/login")
-    public APIResponse tokenLogin(@RequestParam("token") String token) throws IOException {
-        return logService.tokenLogin(token);
+    public APIResponse tokenLogin(@RequestParam("token") String token,
+                                  HttpSession httpSession) throws IOException {
+        return logService.tokenLogin(token, httpSession);
     }
 
     @PostMapping("/api/login")

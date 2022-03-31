@@ -2,8 +2,6 @@ package com.example._52hz.dao;
 
 import com.example._52hz.entity.User;
 import org.apache.ibatis.annotations.*;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -30,4 +28,32 @@ public interface UserMapper {
             @Param("campus") String campus,     @Param("phone") String phone,
             @Param("email") String email,       @Param("grade") String grade,
             @Param("stu_number") String stu_number, @Param("updated_at") String updated_at);
+
+    @Select("select * from user where  phone=#{phone}")
+    List<User> getUserByPhone(@Param("phone") String phone);
+
+    @Select("select * from user where qq=#{qq}")
+    List<User> getUserByQq(@Param("qq") String qq);
+
+    @Select("select * from user where wechat=#{wechat}")
+    List<User> getUserByWechat(@Param("wechat") String wechat);
+
+    @Select("select * from user where email=#{email}")
+    List<User> getUserByEmail(@Param("email") String email);
+
+    @Select("select * from user where u_name=#{u_name}")
+    List<User> getUserByUName(@Param("u_name") String u_name);
+
+    @Select("select * from user where u_name=#{u_name} and grade=#{grade}")
+    List<User> getUserByUNameAndGrade(@Param("u_name") String u_name,@Param("grade") String grade);
+
+    @Select("select * from user where u_name=#{u_name} and gender=#{gender}")
+    List<User> getUserByUNameAndGender(@Param("u_name") String u_name,@Param("gender") String gender);
+
+    @Select("select * from user where u_name=#{u_name} and gender=#{gender} and grade=#{grade}")
+    List<User> getUserByUNameAndGenderAndGrade(@Param("u_name") String u_name,@Param("gender") String gender,String grade);
+
+    //通过用户学生卡号获取relationshipID
+    @Select("SELECT relationship_id FROM user WHERE user.stu_number = #{stu_number};")
+    Integer getRelationIdByStuNumber(@Param("stu_number") String stu_number);
 }

@@ -48,6 +48,7 @@ public class LogServiceImpl implements LogService {
 
     private ReentrantLock lock = new ReentrantLock();
 
+    // Log in Through Token with Get Method.
     private TwtUser httpGetUserWithToken(String token) {
         try {
             OkHttpClient client = new OkHttpClient().newBuilder().build();
@@ -74,6 +75,7 @@ public class LogServiceImpl implements LogService {
         }
     }
 
+    // Load User from TwtUser to Our User. --> Update or Insert Database
     private User loadUser(TwtUser twtUser){
         List<User> userList = userMapper.getUserByStuNumber(twtUser.getUserNumber());
         // convert into grade
@@ -101,47 +103,8 @@ public class LogServiceImpl implements LogService {
         return userMapper.getUserByStuNumber(twtUser.getUserNumber()).get(0);
     }
 
-
-    @Override
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
-    public APIResponse tokenLogin(String token){
-        lock.lock();
-        try{
-            TwtUser twtUser = httpGetUserWithToken(token);
-
-            if(twtUser==null){
-                return APIResponse.error(ErrorCode.TOKEN_LOGIN_ERROR);
-            }
-
-            loadUser(twtUser);
-
-            return APIResponse.success(userMapper.getUserByStuNumber(twtUser.getUserNumber()));
-        }catch (Exception e){
-            e.printStackTrace();
-            return APIResponse.error(ErrorCode.SERVICE_ERROR);
-        }finally {
-            lock.unlock();
-        }
-    }
-
-    private TwtLoginResponse postLogin(String account, String password){
-        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("account", account);
-        map.add("password", password);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("ticket", RestTemplateConfig.getTicket());
-        headers.set("domain", RestTemplateConfig.getDomain());
-        TwtLoginResponse response = restTemplate.postForObject(
-                RestTemplateConfig.getPost_url(),
-                new HttpEntity<>(map, headers),
-                TwtLoginResponse.class,
-                map);
-        return response;
-    }
-
-    // Get User Information From Request
+    // Get User Information From Request.getResult()
     private TwtUser getTwtUserFromMap(LinkedHashMap<String, String> map) {
-
         TwtUser user = new TwtUser();
         user.setUserNumber(map.get("userNumber"));
         user.setEmail(map.get("email"));
@@ -160,8 +123,58 @@ public class LogServiceImpl implements LogService {
         return user;
     }
 
+    // Login with Account and Password Through POST Method.
+    private TwtLoginResponse postLogin(String account, String password){
+        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+        map.add("account", account);
+        map.add("password", password);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("ticket", RestTemplateConfig.getTicket());
+        headers.set("domain", RestTemplateConfig.getDomain());
+        TwtLoginResponse response = restTemplate.postForObject(
+                RestTemplateConfig.getPost_url(),
+                new HttpEntity<>(map, headers),
+                TwtLoginResponse.class,
+                map);
+        return response;
+    }
 
 
+    /**
+     * Login with Token
+     * @param token
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    public APIResponse tokenLogin(String token, HttpSession httpSession){
+        lock.lock();
+        try{
+            TwtUser twtUser = httpGetUserWithToken(token);
+
+            if(twtUser==null){
+                return APIResponse.error(ErrorCode.TOKEN_LOGIN_ERROR);
+            }
+
+            User user = loadUser(twtUser);
+            httpSession.setAttribute("user", user);
+            return APIResponse.success(user);
+        }catch (Exception e){
+            e.printStackTrace();
+            return APIResponse.error(ErrorCode.SERVICE_ERROR);
+        }finally {
+            lock.unlock();
+        }
+    }
+
+
+    /**
+     * Login with Account and Password
+     * @param account
+     * @param password
+     * @param httpSession
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     public APIResponse classicLogin(String account, String password, HttpSession httpSession){
@@ -174,7 +187,7 @@ public class LogServiceImpl implements LogService {
                 TwtUser twtUser = getTwtUserFromMap((LinkedHashMap<String, String>) response.getResult());
                 User user = loadUser(twtUser);
                 httpSession.setAttribute("user", user);
-                return APIResponse.success(user);
+                return APIResponse.success(twtUser);
 
             }else if (response.getError_code() == 40001) {
 

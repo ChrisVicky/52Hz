@@ -37,6 +37,8 @@ public class User {
     private String department;
     private String campus;
 
+    private Integer relationship_id; /* If he has a relationship */
+
     private Integer is_deleted; /* default 0 */
 
 
