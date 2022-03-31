@@ -25,6 +25,7 @@ public enum ErrorCode {
     LOGIN_ERROR(1002, "Log in Error"),
     NO_SUCH_USER(1003, "No Such User"),
     PASSWORD_ERROR(1004, "Password Error"),
+    NOT_LOGIN_YET(1005,"Not Login Yet. Please Login first"),
     SERVICE_ERROR(5000, "Service Error"),
     TOKEN_LOGIN_ERROR(6001,"This token may no longer in used, Login with token Failed");
     private int code;
