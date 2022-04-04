@@ -212,4 +212,15 @@ public class LogServiceImpl implements LogService {
             lock.unlock();
         }
     }
+
+    @Override
+    public APIResponse logBack(String stu_number, HttpSession httpSession) {
+        User user = userMapper.getUserByStuNumber(stu_number).get(0);
+        if(user==null){
+            return APIResponse.error(ErrorCode.SERVICE_ERROR);
+        }
+        httpSession.setAttribute("user", user);
+        return APIResponse.success(user);
+    }
+
 }

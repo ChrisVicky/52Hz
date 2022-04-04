@@ -41,4 +41,5 @@ public class LogController {
         return logService.classicLogin(account, password, httpSession);
     }
 
+
 }

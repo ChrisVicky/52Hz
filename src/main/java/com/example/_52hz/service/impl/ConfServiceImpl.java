@@ -7,14 +7,11 @@ import com.example._52hz.dao.BufferMapper;
 import com.example._52hz.dao.RelationshipMapper;
 import com.example._52hz.dao.UserMapper;
 import com.example._52hz.entity.Buffer;
-import com.example._52hz.entity.Relationship;
 import com.example._52hz.entity.User;
 import com.example._52hz.service.ConfService;
 import com.example._52hz.util.APIResponse;
 import com.example._52hz.util.ErrorCode;
-import com.example._52hz.util.Matcher;
 import com.example._52hz.util.TwtUser;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -24,8 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
-import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
@@ -42,8 +40,6 @@ public class ConfServiceImpl implements ConfService {
     @Resource
     RelationshipMapper relationshipMapper;
 
-    @Resource
-    Matcher matcher;
 
 
     private ReentrantLock lock = new ReentrantLock();
@@ -74,6 +70,28 @@ public class ConfServiceImpl implements ConfService {
         }
     }
 
+
+    public List<User> getUserByBuffer(Buffer buffer){
+        if(buffer==null){
+            return null;
+        }
+        List<User> userList = new ArrayList<>();
+        if(buffer.getStu_number().length()!=0){
+            userList = userMapper.getUserByStuNumber(buffer.getStu_number());
+        }else if(buffer.getPhone().length()!=0){
+            userList = userMapper.getUserByPhone(buffer.getPhone());
+        }else if(buffer.getQq().length()!=0){
+            userList = userMapper.getUserByQq(buffer.getQq());
+        }else if(buffer.getWechat().length()!=0){
+            userList = userMapper.getUserByWechat(buffer.getWechat());
+        }else if(buffer.getEmail().length()!=0){
+            userList = userMapper.getUserByEmail(buffer.getEmail());
+        }else{
+            userList = userMapper.getUserByUNameAndGenderAndGrade(buffer.getU_name(),buffer.getGender(), buffer.getGrade());
+        }
+        return userList;
+    }
+
     /**
      * 1. Add Confession
      * 2. Check is_match
@@ -90,6 +108,7 @@ public class ConfServiceImpl implements ConfService {
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     public APIResponse addConfession(HttpSession session, String stu_number, String phone,
                                      String qq, String wechat, String u_name, String gender,
                                      String grade, String email, String msg) {
@@ -127,8 +146,10 @@ public class ConfServiceImpl implements ConfService {
             }
             // Up to now, we made sure that parameters are Valid.
             // So add new confession to buffer
-            Time updated_at = new Time(System.currentTimeMillis());
-            bufferMapper.insertBuffer(u_id, stu_number, phone, qq, wechat, u_name, gender, grade, email, msg, updated_at);
+            // convert Date
+            Date date = new Date();
+            SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            bufferMapper.insertBuffer(u_id, stu_number, phone, qq, wechat, u_name, gender, grade, email, msg, ft.format(date));
             // Then we begin our match
             if(uIdList.isEmpty()){
                 return APIResponse.success(ret_string + match_failed);
@@ -141,22 +162,23 @@ public class ConfServiceImpl implements ConfService {
                 if(bufferList.isEmpty()) {
                     continue;
                 }
-                List<User> userList = matcher.getUserByBuffer(bufferList.get(0));
+                List<User> userList = getUserByBuffer(bufferList.get(0));
                 for(User _newUser : userList){
                     if(Objects.equals(_newUser.getU_id(), u_id)){
                         // MATCH!!!
                         // 1. Set New Relationship
                         Integer bid1 = bufferList.get(0).getB_id();
                         Integer bid2 = bufferMapper.getBufferByUid(u_id).get(0).getB_id();
-                        Time matched_at = new Time(System.currentTimeMillis());
-                        relationshipMapper.insertRelationship(bid1, bid2, matched_at.toString());
+                        date = new Date();
+                        ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                        relationshipMapper.insertRelationship(bid1, bid2, ft.format(date));
                         // 2. Attach New Relationship to User
                         Integer r_id = relationshipMapper.getRIdByBId1BId2(bid1, bid2);
                         userMapper.setRelationshipId(r_id, u_id);
                         userMapper.setRelationshipId(r_id, uId);
                         // 3. Delete Confession from Buffer to Prevent Multiple Match
-                        deleteConfession(bid1);
-                        deleteConfession(bid2);
+                        bufferMapper.matchBuffer(bid1, ft.format(date));
+                        bufferMapper.matchBuffer(bid2, ft.format(date));
                         return APIResponse.success(ret_string + match_success);
                     }
                 }
@@ -168,11 +190,18 @@ public class ConfServiceImpl implements ConfService {
         }
     }
 
+    /**
+     * !!!! Relationship !!!!
+     * @param b_id
+     * @return
+     */
     @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     public APIResponse deleteConfession(Integer b_id) {
         try {
-            Time updated_at = new Time(System.currentTimeMillis());
-            bufferMapper.deleteBuffer(b_id,updated_at);
+            Date date = new Date();
+            SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            bufferMapper.deleteBuffer(b_id,ft.format(date));
         } catch (Exception e) {
             e.printStackTrace();
             return APIResponse.error(ErrorCode.DELETE_CONFESSION_ERROR);
@@ -181,10 +210,17 @@ public class ConfServiceImpl implements ConfService {
     }
 
     @Override
-    public APIResponse updateConfession(String msg, Integer b_id) {
+    public APIResponse updateConfession(String msg, HttpSession session) {
         try {
-            Time updated_at = new Time(System.currentTimeMillis());
-            bufferMapper.updateBuffer(msg, updated_at, b_id);
+            User user = (User) session.getAttribute("user");
+            List<Buffer> bufferList = bufferMapper.getBufferByUid2(user.getU_id());
+            if(bufferList.isEmpty()){
+                return APIResponse.success("No Confession");
+            }
+            Integer b_id = bufferList.get(0).getB_id();
+            Date date = new Date();
+            SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            bufferMapper.updateBuffer(msg, ft.format(date), b_id);
         } catch (Exception e) {
             e.printStackTrace();
             return APIResponse.error(ErrorCode.UPDATE_CONFESSION_ERROR);
@@ -201,7 +237,7 @@ public class ConfServiceImpl implements ConfService {
     }
 
     /**
-     *查看表白状态
+     *  查看表白状态
      *      返回isMatch状态
      *      两条表白信息
      * @param session
@@ -227,7 +263,7 @@ public class ConfServiceImpl implements ConfService {
                 return APIResponse.success("匹配失败");
             }
             //匹配成功获取两条消息
-            return new APIResponse("匹配成功",bufferMapper.getBuffersByRid(relationShipId));
+            return APIResponse.success("匹配成功", bufferMapper.getBuffersByRid(relationShipId));
         }catch(Exception e){
             e.printStackTrace();
             return APIResponse.error(ErrorCode.SERVICE_ERROR);

@@ -4,6 +4,10 @@ import com.example._52hz.dao.UserMapper;
 import com.example._52hz.entity.Buffer;
 import com.example._52hz.entity.User;
 
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Service;
+
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,25 +117,5 @@ public class Matcher {
         return userList;
     }
 
-    public List<User> getUserByBuffer(Buffer buffer){
-        if(buffer==null){
-            return null;
-        }
-        List<User> userList = new ArrayList<>();
-        if(buffer.getStu_number().length()!=0){
-            userList = userMapper.getUserByStuNumber(buffer.getStu_number());
-        }else if(buffer.getPhone().length()!=0){
-            userList = userMapper.getUserByPhone(buffer.getPhone());
-        }else if(buffer.getQq().length()!=0){
-            userList = userMapper.getUserByQq(buffer.getQq());
-        }else if(buffer.getWechat().length()!=0){
-            userList = userMapper.getUserByWechat(buffer.getWechat());
-        }else if(buffer.getEmail().length()!=0){
-            userList = userMapper.getUserByEmail(buffer.getEmail());
-        }else{
-            userList = userMapper.getUserByUNameAndGenderAndGrade(buffer.getU_name(),buffer.getGender(), buffer.getGrade());
-        }
-        return userList;
-    }
 
 }

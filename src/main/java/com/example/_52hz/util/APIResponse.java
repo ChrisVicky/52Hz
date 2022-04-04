@@ -52,4 +52,5 @@ public class APIResponse {
     public static APIResponse success(Object result) {
         return new APIResponse(0, "Success", result);
     }
+    public static APIResponse success(String msg, Object result){ return new APIResponse(0, msg, result); }
 }

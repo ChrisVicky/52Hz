@@ -12,4 +12,6 @@ public interface LogService {
     APIResponse tokenLogin(String token, HttpSession httpSession);
 
     APIResponse classicLogin(String account, String password, HttpSession httpSession);
+
+    APIResponse logBack(String stu_number, HttpSession httpSession);
 }

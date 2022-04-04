@@ -32,7 +32,7 @@ public interface ConfService {
      * 更新成功返回"更新告白成功"
      * 更新失败返回"UPDATE_CONFESSION_ERROR"
      * */
-    APIResponse updateConfession(String msg,Integer b_id);
+    APIResponse updateConfession(String msg, HttpSession session);
 
     /**
      * 根据user进行buffer匹配

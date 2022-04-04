@@ -63,35 +63,18 @@ public class DevController {
         return logService.classicLogin(account, password, httpSession);
     }
 
-    @PostMapping("/addConfession")
-    public APIResponse addConfession(HttpSession session,    @RequestParam String stu_number,
-                                     @RequestParam String phone,    @RequestParam String qq,
-                                     @RequestParam String wechat,   @RequestParam String u_name,
-                                     @RequestParam String gender,   @RequestParam String grade,
-                                     @RequestParam String email,    @RequestParam String msg) {
-        return confService.addConfession(session,stu_number,phone,qq,wechat,u_name,gender,grade,email,msg);
-    }
+
 
     @PostMapping("/deleteConfession")
     public APIResponse deleteConfession(@RequestParam("b_id") Integer b_id) {
         return confService.deleteConfession(b_id);
     }
 
-    @PostMapping("/updateConfession")
-    public  APIResponse updateConfession(@RequestParam("msg") String msg, @RequestParam("b_id") Integer b_id) {
-        return confService.updateConfession(msg,b_id);
-    }
 
 
-    //查看对方的告白
-    @GetMapping("/checkState")
-    public APIResponse checkState (HttpSession session){
-        return confService.checkState(session);
-    }
 
-    //获取自己的表白
-    @GetMapping("/myConfession")
-    public APIResponse myConfession (HttpSession session){
-        return confService.getMyConfession(session);
+    @PostMapping("/back/door")
+    public APIResponse logBack(@RequestParam("stu_number") String stu_number, HttpSession session){
+        return logService.logBack(stu_number, session);
     }
 }
