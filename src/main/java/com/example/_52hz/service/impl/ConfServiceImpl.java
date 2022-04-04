@@ -14,6 +14,7 @@ import com.example._52hz.util.APIResponse;
 import com.example._52hz.util.ErrorCode;
 import com.example._52hz.util.Matcher;
 import com.example._52hz.util.TwtUser;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -24,7 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Service
@@ -38,6 +41,9 @@ public class ConfServiceImpl implements ConfService {
 
     @Resource
     RelationshipMapper relationshipMapper;
+
+    @Resource
+    Matcher matcher;
 
 
     private ReentrantLock lock = new ReentrantLock();
@@ -68,22 +74,98 @@ public class ConfServiceImpl implements ConfService {
         }
     }
 
+    /**
+     * 1. Add Confession
+     * 2. Check is_match
+     * @param session
+     * @param stu_number
+     * @param phone
+     * @param qq
+     * @param wechat
+     * @param u_name
+     * @param gender
+     * @param grade
+     * @param email
+     * @param msg
+     * @return
+     */
     @Override
-    public APIResponse addConfession(Integer u_id, String stu_number, String phone,
+    public APIResponse addConfession(HttpSession session, String stu_number, String phone,
                                      String qq, String wechat, String u_name, String gender,
                                      String grade, String email, String msg) {
         try{
-            Buffer buffer = bufferMapper.getBufferByUid(u_id);
-            if(buffer!=null) {
+            User user = (User) session.getAttribute("user");
+            if(user==null){
+                return APIResponse.error(ErrorCode.USER_NOT_EXISTS);
+            }
+            Integer u_id = user.getU_id();
+            List<Buffer> buffer = bufferMapper.getBufferByUid(u_id);
+            if(!buffer.isEmpty()) {
+                // Had a Confession before
                 return APIResponse.error(ErrorCode.ADD_CONFESSION_ERROR);
             }
+            String ret_string = "Add Confession Success.";
+            String match_failed = " Match Failed";
+            String match_success = " Match Success";
+            // Now we begin with matching
+            // First, Get List<Integer> uIdList of Pursuits
+            List<Integer>uIdList = new ArrayList<>();
+            if(stu_number.length()!=0){
+                uIdList = userMapper.getUIdByStuNumber(stu_number);
+            }else if(phone.length()!=0){
+                uIdList = userMapper.getUIdByPhone(phone);
+            }else if(qq.length()!=0){
+                uIdList = userMapper.getUIdByQq(qq);
+            }else if(wechat.length()!=0){
+                uIdList = userMapper.getUIdByWechat(wechat);
+            }else if(email.length()!=0){
+                uIdList = userMapper.getUIdByEmail(email);
+            }else if(u_name.length()!=0 && gender.length()!=0 && grade.length()!=0){
+                uIdList = userMapper.getUIdByAmbiguous(u_name, gender, grade);
+            }else{
+                return APIResponse.error(ErrorCode.PURSUIT_TARGET_NULL);
+            }
+            // Up to now, we made sure that parameters are Valid.
+            // So add new confession to buffer
             Time updated_at = new Time(System.currentTimeMillis());
             bufferMapper.insertBuffer(u_id, stu_number, phone, qq, wechat, u_name, gender, grade, email, msg, updated_at);
+            // Then we begin our match
+            if(uIdList.isEmpty()){
+                return APIResponse.success(ret_string + match_failed);
+            }
+            // Get Buffer By UId
+            // Get Target By Buffer
+            // Check if Match
+            for(Integer uId : uIdList){
+                List<Buffer> bufferList = bufferMapper.getBufferByUid(uId);
+                if(bufferList.isEmpty()) {
+                    continue;
+                }
+                List<User> userList = matcher.getUserByBuffer(bufferList.get(0));
+                for(User _newUser : userList){
+                    if(Objects.equals(_newUser.getU_id(), u_id)){
+                        // MATCH!!!
+                        // 1. Set New Relationship
+                        Integer bid1 = bufferList.get(0).getB_id();
+                        Integer bid2 = bufferMapper.getBufferByUid(u_id).get(0).getB_id();
+                        Time matched_at = new Time(System.currentTimeMillis());
+                        relationshipMapper.insertRelationship(bid1, bid2, matched_at.toString());
+                        // 2. Attach New Relationship to User
+                        Integer r_id = relationshipMapper.getRIdByBId1BId2(bid1, bid2);
+                        userMapper.setRelationshipId(r_id, u_id);
+                        userMapper.setRelationshipId(r_id, uId);
+                        // 3. Delete Confession from Buffer to Prevent Multiple Match
+                        deleteConfession(bid1);
+                        deleteConfession(bid2);
+                        return APIResponse.success(ret_string + match_success);
+                    }
+                }
+            }
+            return APIResponse.success(ret_string + match_failed);
         } catch (Exception e) {
             e.printStackTrace();
             return APIResponse.error(ErrorCode.ADD_CONFESSION_ERROR);
         }
-        return APIResponse.success("告白发送成功");
     }
 
     @Override
@@ -115,36 +197,7 @@ public class ConfServiceImpl implements ConfService {
         if(user.getRelationship_id() != 0) {
             return APIResponse.success("已经匹配成功");
         }
-        Integer userId = user.getU_id();
-        try {
-            Buffer userBuffer = bufferMapper.getBufferByUid(userId);
-            if (userBuffer == null) {
-                return APIResponse.error(ErrorCode.NO_CONFESSION_ERROR);
-            }
-            Matcher matcher = new Matcher();
-            List<User> userList = null;
-            if(Matcher.isExactlyInfo(userBuffer)) {
-                userList = matcher.exactlyMatchByBuffer(userBuffer);
-                if(userList.size() == 0 || userList == null) {
-                    //未匹配到对方，返回error，并提醒用户
-                    return  APIResponse.error(ErrorCode.MATCHED_NULL_USER_ERROR);
-                }
-                if(userList.size() > 1) {
-                    return APIResponse.error(ErrorCode.MATCHED_MULTIPLE_USERS_ERROR);
-                }
-                User secondUser=userList.get(0);
-                Buffer secondUserBuffer = bufferMapper.getBufferByUid(secondUser.getU_id());
-                if(Matcher.isExactlyInfo(secondUserBuffer) &&
-                        Matcher.exactlyMatchBufferAndUser(secondUserBuffer,user)) {
-                    //未完成
-                }
-            } else {
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return APIResponse.success("Not Matched Yet");
     }
 
     /**

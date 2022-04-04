@@ -16,7 +16,7 @@ public interface ConfService {
      * 添加成功返回"告白发送成功"
      * 添加失败返回ADD_CONFESSION_ERROR
      * */
-    APIResponse addConfession(Integer u_id, String stu_number, String phone,
+    APIResponse addConfession(HttpSession session, String stu_number, String phone,
                               String qq, String wechat, String u_name, String gender,
                               String grade, String email, String msg);
 

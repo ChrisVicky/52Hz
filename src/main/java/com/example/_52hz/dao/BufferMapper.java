@@ -36,5 +36,6 @@ public interface BufferMapper {
 
     //通过u_id获取buffer
     @Select("SELECT * FROM buffer b WHERE b.u_id = #{u_id} AND b.is_deleted = 0;")
-    Buffer getBufferByUid(@Param("u_id") Integer u_id);
+    List<Buffer> getBufferByUid(@Param("u_id") Integer u_id);
+
 }

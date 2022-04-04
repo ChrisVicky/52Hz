@@ -5,6 +5,7 @@ import com.example._52hz.entity.Buffer;
 import com.example._52hz.entity.User;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Matcher {
@@ -15,6 +16,8 @@ public class Matcher {
      * 是否是精确信息
      * 前端要求精确信息只填一个
      * 前端要求模糊信息必须要填名字
+     *
+     * Christopher : NULL!!!! Precision should not be restricted.
      */
 
     public static boolean isExactlyInfo(Buffer buffer) {
@@ -88,7 +91,7 @@ public class Matcher {
         if(buffer == null) {
             return null;
         }
-        List<User> userList = null;
+        List<User> userList = new ArrayList<>();
         String userName = buffer.getU_name();
         String gender = buffer.getGender();
         String grade = buffer.getGrade();
@@ -106,6 +109,27 @@ public class Matcher {
             }    else {
                 userList = userMapper.getUserByUName(userName);
             }
+        }
+        return userList;
+    }
+
+    public List<User> getUserByBuffer(Buffer buffer){
+        if(buffer==null){
+            return null;
+        }
+        List<User> userList = new ArrayList<>();
+        if(buffer.getStu_number().length()!=0){
+            userList = userMapper.getUserByStuNumber(buffer.getStu_number());
+        }else if(buffer.getPhone().length()!=0){
+            userList = userMapper.getUserByPhone(buffer.getPhone());
+        }else if(buffer.getQq().length()!=0){
+            userList = userMapper.getUserByQq(buffer.getQq());
+        }else if(buffer.getWechat().length()!=0){
+            userList = userMapper.getUserByWechat(buffer.getWechat());
+        }else if(buffer.getEmail().length()!=0){
+            userList = userMapper.getUserByEmail(buffer.getEmail());
+        }else{
+            userList = userMapper.getUserByUNameAndGenderAndGrade(buffer.getU_name(),buffer.getGender(), buffer.getGrade());
         }
         return userList;
     }

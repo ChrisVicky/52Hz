@@ -64,32 +64,24 @@ public class DevController {
     }
 
     @PostMapping("/addConfession")
-    public APIResponse addConfession(HttpServletRequest request,    @RequestParam String stu_number,
+    public APIResponse addConfession(HttpSession session,    @RequestParam String stu_number,
                                      @RequestParam String phone,    @RequestParam String qq,
                                      @RequestParam String wechat,   @RequestParam String u_name,
                                      @RequestParam String gender,   @RequestParam String grade,
                                      @RequestParam String email,    @RequestParam String msg) {
-
-        User user = (User)request.getAttribute("user");
-
-        return confService.addConfession(user.getU_id(),stu_number,phone,qq,wechat,u_name,gender,grade,email,msg);
+        return confService.addConfession(session,stu_number,phone,qq,wechat,u_name,gender,grade,email,msg);
     }
 
-    @PostMapping("/deleteConfession/{b_id}")
-    public APIResponse deleteConfession(@PathVariable Integer b_id) {
+    @PostMapping("/deleteConfession")
+    public APIResponse deleteConfession(@RequestParam("b_id") Integer b_id) {
         return confService.deleteConfession(b_id);
     }
 
-    @PostMapping
+    @PostMapping("/updateConfession")
     public  APIResponse updateConfession(@RequestParam("msg") String msg, @RequestParam("b_id") Integer b_id) {
         return confService.updateConfession(msg,b_id);
     }
 
-    /*    //获取告白信息
-    @GetMapping("/dev/getAllConfession")
-    public APIResponse getAllConfession(@RequestParam("token") String token) throws IOException{
-
-    }*/
 
     //查看对方的告白
     @GetMapping("/checkState")

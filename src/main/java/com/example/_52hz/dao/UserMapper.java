@@ -56,4 +56,26 @@ public interface UserMapper {
     //通过用户学生卡号获取relationshipID
     @Select("SELECT relationship_id FROM user WHERE user.stu_number = #{stu_number};")
     Integer getRelationIdByStuNumber(@Param("stu_number") String stu_number);
+
+    @Select("SELECT u_id FROM user WHERE phone=#{phone} and is_deleted=0;")
+    List<Integer> getUIdByPhone(@Param("phone") String phone);
+
+    @Select("SELECT u_id FROM user WHERE stu_number=#{stu_number} and is_deleted=0;")
+    List<Integer> getUIdByStuNumber(@Param("stu_number") String stu_number);
+
+    @Select("SELECT u_id FROM user WHERE email=#{email} and is_deleted=0;")
+    List<Integer> getUIdByEmail(@Param("email") String email);
+
+    @Select("SELECT u_id FROM user WHERE qq=#{qq} and is_deleted=0;")
+    List<Integer> getUIdByQq(@Param("qq") String qq);
+
+    @Select("SELECT u_id FROM user WHERE wechat=#{wechat} and is_deleted=0;")
+    List<Integer> getUIdByWechat(@Param("wechat") String wechat);
+
+    @Select("SELECT u_id FROM user WHERE u_name=#{u_name} and gender=#{gender} and grade=#{grade} and is_deleted=0;")
+    List<Integer> getUIdByAmbiguous(@Param("u_name") String u_name, @Param("gender") String gender,
+                                    @Param("grade") String grade);
+
+    @Update("UPDATE user SET relationship_id = #{relationship_id} WHERE u_id = #{u_id} and is_deleted=0")
+    void setRelationshipId(@Param("relationship_id") Integer relationshipId, @Param("u_id") Integer u_id);
 }
