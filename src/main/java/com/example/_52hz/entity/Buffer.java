@@ -42,5 +42,6 @@ public class Buffer {
     private String updated_at; /**/
 
     private Integer is_deleted; /* default --> 0 */
+    private Integer is_matched; /* default --> 0 */
 
 }

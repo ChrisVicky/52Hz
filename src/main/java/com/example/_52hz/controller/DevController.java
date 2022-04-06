@@ -65,10 +65,6 @@ public class DevController {
 
 
 
-    @PostMapping("/deleteConfession")
-    public APIResponse deleteConfession(@RequestParam("b_id") Integer b_id) {
-        return confService.deleteConfession(b_id);
-    }
 
 
 

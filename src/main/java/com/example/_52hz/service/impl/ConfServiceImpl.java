@@ -7,6 +7,7 @@ import com.example._52hz.dao.BufferMapper;
 import com.example._52hz.dao.RelationshipMapper;
 import com.example._52hz.dao.UserMapper;
 import com.example._52hz.entity.Buffer;
+import com.example._52hz.entity.Relationship;
 import com.example._52hz.entity.User;
 import com.example._52hz.service.ConfService;
 import com.example._52hz.util.APIResponse;
@@ -71,11 +72,11 @@ public class ConfServiceImpl implements ConfService {
     }
 
 
-    public List<User> getUserByBuffer(Buffer buffer){
+    public List<User> getTargetUserByBuffer(Buffer buffer){
         if(buffer==null){
             return null;
         }
-        List<User> userList = new ArrayList<>();
+        List<User> userList;
         if(buffer.getStu_number().length()!=0){
             userList = userMapper.getUserByStuNumber(buffer.getStu_number());
         }else if(buffer.getPhone().length()!=0){
@@ -92,21 +93,7 @@ public class ConfServiceImpl implements ConfService {
         return userList;
     }
 
-    /**
-     * 1. Add Confession
-     * 2. Check is_match
-     * @param session
-     * @param stu_number
-     * @param phone
-     * @param qq
-     * @param wechat
-     * @param u_name
-     * @param gender
-     * @param grade
-     * @param email
-     * @param msg
-     * @return
-     */
+    // Add Confession
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     public APIResponse addConfession(HttpSession session, String stu_number, String phone,
@@ -121,14 +108,15 @@ public class ConfServiceImpl implements ConfService {
             List<Buffer> buffer = bufferMapper.getBufferByUid(u_id);
             if(!buffer.isEmpty()) {
                 // Had a Confession before
-                return APIResponse.error(ErrorCode.ADD_CONFESSION_ERROR);
+                return APIResponse.error(ErrorCode.HAD_CONFESSION_BEFORE_ERROR);
             }
             String ret_string = "Add Confession Success.";
             String match_failed = " Match Failed";
             String match_success = " Match Success";
+
             // Now we begin with matching
             // First, Get List<Integer> uIdList of Pursuits
-            List<Integer>uIdList = new ArrayList<>();
+            List<Integer>uIdList;
             if(stu_number.length()!=0){
                 uIdList = userMapper.getUIdByStuNumber(stu_number);
             }else if(phone.length()!=0){
@@ -144,31 +132,37 @@ public class ConfServiceImpl implements ConfService {
             }else{
                 return APIResponse.error(ErrorCode.PURSUIT_TARGET_NULL);
             }
+
             // Up to now, we made sure that parameters are Valid.
             // So add new confession to buffer
+
             // convert Date
             Date date = new Date();
             SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             bufferMapper.insertBuffer(u_id, stu_number, phone, qq, wechat, u_name, gender, grade, email, msg, ft.format(date));
+
             // Then we begin our match
             if(uIdList.isEmpty()){
+                // Target have never ever logged in.
+                // So No confession should he (she) make.
                 return APIResponse.success(ret_string + match_failed);
             }
-            // Get Buffer By UId
-            // Get Target By Buffer
-            // Check if Match
+            // Target Valid, Maybe there are Confessions
+            // 1. Get Buffer (Confessions) By UId
+            // 2. Get new Target's Uid By Buffer
+            // 3. Check is Match
             for(Integer uId : uIdList){
-                List<Buffer> bufferList = bufferMapper.getBufferByUid(uId);
+                List<Buffer> bufferList = bufferMapper.getUnMatchedBufferByUid(uId);
                 if(bufferList.isEmpty()) {
                     continue;
                 }
-                List<User> userList = getUserByBuffer(bufferList.get(0));
+                List<User> userList = getTargetUserByBuffer(bufferList.get(0));
                 for(User _newUser : userList){
                     if(Objects.equals(_newUser.getU_id(), u_id)){
                         // MATCH!!!
                         // 1. Set New Relationship
                         Integer bid1 = bufferList.get(0).getB_id();
-                        Integer bid2 = bufferMapper.getBufferByUid(u_id).get(0).getB_id();
+                        Integer bid2 = bufferMapper.getUnMatchedBufferByUid(u_id).get(0).getB_id();
                         date = new Date();
                         ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
                         relationshipMapper.insertRelationship(bid1, bid2, ft.format(date));
@@ -176,7 +170,7 @@ public class ConfServiceImpl implements ConfService {
                         Integer r_id = relationshipMapper.getRIdByBId1BId2(bid1, bid2);
                         userMapper.setRelationshipId(r_id, u_id);
                         userMapper.setRelationshipId(r_id, uId);
-                        // 3. Delete Confession from Buffer to Prevent Multiple Match
+                        // 3. Match Confession from Buffer to Prevent Multiple Match
                         bufferMapper.matchBuffer(bid1, ft.format(date));
                         bufferMapper.matchBuffer(bid2, ft.format(date));
                         return APIResponse.success(ret_string + match_success);
@@ -190,30 +184,64 @@ public class ConfServiceImpl implements ConfService {
         }
     }
 
-    /**
-     * !!!! Relationship !!!!
-     * @param b_id
-     * @return
-     */
+
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
-    public APIResponse deleteConfession(Integer b_id) {
+    public APIResponse deleteConfession(HttpSession session) {
         try {
-            Date date = new Date();
-            SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            bufferMapper.deleteBuffer(b_id,ft.format(date));
+            User user = (User) session.getAttribute("user");
+            if(user==null) {
+                return APIResponse.error(ErrorCode.SESSION_ERROR);
+            }
+            List<Buffer> bufferList = bufferMapper.getUndeletedBufferByUid(user.getU_id());
+            if(bufferList.isEmpty()){
+                return APIResponse.error(ErrorCode.NO_CONFESSION_ERROR);
+            }
+            if(bufferList.size()>1){
+                return APIResponse.error(ErrorCode.MULTIPLE_CONFESSIONS_ERROR);
+            }
+            Buffer buffer = bufferList.get(0);
+            Integer b_id = buffer.getB_id();
+            Integer is_matched = buffer.getIs_matched();
+            if(is_matched == 1){
+                // Matched, Delete Relationship as well
+                List<Relationship> relationshipList = relationshipMapper.getRelationshipByBId(b_id);
+                if(relationshipList.isEmpty()){
+                    return APIResponse.error(ErrorCode.SERVICE_ERROR);
+                }
+                if(relationshipList.size()>1){
+                    return APIResponse.error(ErrorCode.MULTIPLE_USER);
+                }
+                Relationship relationship = relationshipList.get(0);
+                Integer anotherBId = relationship.getB_id_1() + relationship.getB_id_2() - b_id;
+                // Delete Buffer
+                Date date = new Date();
+                SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                bufferMapper.deleteBuffer(b_id,ft.format(date));
+                bufferMapper.deleteBuffer(anotherBId, ft.format(date));
+                // Delete Relationship
+                relationshipMapper.deleteRelationshipByRId(relationship.getR_id());
+                // Delete User's Is_Match
+                userMapper.deleteRelationshipId(relationship.getR_id());
+            }else{
+                // Not Matched, Delete Buffer only
+                Date date = new Date();
+                SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                bufferMapper.deleteBuffer(b_id,ft.format(date));
+            }
+            return APIResponse.success("Confession deleted as well as the related Confession, Relationship and his is_matched status.");
         } catch (Exception e) {
             e.printStackTrace();
             return APIResponse.error(ErrorCode.DELETE_CONFESSION_ERROR);
         }
-        return  APIResponse.success("删除成功");
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     public APIResponse updateConfession(String msg, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
-            List<Buffer> bufferList = bufferMapper.getBufferByUid2(user.getU_id());
+            List<Buffer> bufferList = bufferMapper.getUndeletedBufferByUid(user.getU_id());
             if(bufferList.isEmpty()){
                 return APIResponse.success("No Confession");
             }
@@ -228,21 +256,7 @@ public class ConfServiceImpl implements ConfService {
         return APIResponse.success("更新成功");
     }
 
-    @Override
-    public APIResponse matchConfessionByUserId(User user) {
-        if(user.getRelationship_id() != 0) {
-            return APIResponse.success("已经匹配成功");
-        }
-        return APIResponse.success("Not Matched Yet");
-    }
 
-    /**
-     *  查看表白状态
-     *      返回isMatch状态
-     *      两条表白信息
-     * @param session
-     * @return
-     */
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     public APIResponse checkState (HttpSession session){
@@ -273,11 +287,7 @@ public class ConfServiceImpl implements ConfService {
 
     }
 
-    /**
-     * 获取自己的表白
-     * @param session
-     * @return
-     */
+
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     public APIResponse getMyConfession (HttpSession session){
@@ -286,7 +296,7 @@ public class ConfServiceImpl implements ConfService {
             User user  = (User) session.getAttribute("user");
 
             if(user==null){
-                return APIResponse.error(ErrorCode.TOKEN_LOGIN_ERROR);
+                return APIResponse.error(ErrorCode.SESSION_ERROR);
             }
 
             Integer uid = user.getU_id();

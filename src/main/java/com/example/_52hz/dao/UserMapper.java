@@ -78,4 +78,7 @@ public interface UserMapper {
 
     @Update("UPDATE user SET relationship_id = #{relationship_id} WHERE u_id = #{u_id} and is_deleted=0")
     void setRelationshipId(@Param("relationship_id") Integer relationshipId, @Param("u_id") Integer u_id);
+
+    @Update("UPDATE user SET relationship_id = null WHERE relationship_id=#{r_id}")
+    void deleteRelationshipId(@Param("r_id") Integer r_id);
 }

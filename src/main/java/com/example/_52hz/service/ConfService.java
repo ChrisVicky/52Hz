@@ -25,7 +25,7 @@ public interface ConfService {
      * 删除成功返回"删除告白成功"
      * 删除失败返回"DELETE_CONFESSION_ERROR"
      * */
-    APIResponse deleteConfession(Integer b_id);
+    APIResponse deleteConfession(HttpSession session);
 
     /*
      * 更新告白
@@ -38,7 +38,6 @@ public interface ConfService {
      * 根据user进行buffer匹配
      */
 
-    APIResponse matchConfessionByUserId(User user);
 
     APIResponse checkState (HttpSession session);
     APIResponse getMyConfession (HttpSession session);

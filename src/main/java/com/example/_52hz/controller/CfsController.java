@@ -20,12 +20,6 @@ public class CfsController {
     ConfService confService;
 
 
-    //获取自己的表白
-    @GetMapping("/myConfession")
-    public APIResponse myConfession (HttpSession session){
-        return confService.getMyConfession(session);
-    }
-
     @PostMapping("/addConfession")
     public APIResponse addConfession(HttpSession session,    @RequestParam String stu_number,
                                      @RequestParam String phone,    @RequestParam String qq,
@@ -35,9 +29,20 @@ public class CfsController {
         return confService.addConfession(session,stu_number,phone,qq,wechat,u_name,gender,grade,email,msg);
     }
 
+    @PostMapping("/deleteConfession")
+    public APIResponse deleteConfession(HttpSession session) {
+        return confService.deleteConfession(session);
+    }
+
     @PostMapping("/updateConfession")
     public  APIResponse updateConfession(@RequestParam("msg") String msg, HttpSession session) {
         return confService.updateConfession(msg, session);
+    }
+
+    //获取自己的表白
+    @GetMapping("/myConfession")
+    public APIResponse myConfession (HttpSession session){
+        return confService.getMyConfession(session);
     }
 
 
