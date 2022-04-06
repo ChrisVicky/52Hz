@@ -81,4 +81,7 @@ public interface UserMapper {
 
     @Update("UPDATE user SET relationship_id = null WHERE relationship_id=#{r_id}")
     void deleteRelationshipId(@Param("r_id") Integer r_id);
+
+    @Select("SELECT * FROM user where relationship_id = (SELECT relationship_id from user where u_id=#{u_id}) and u_id!=#{u_id};")
+    List<User> getPartner(@Param("u_id") Integer u_id);
 }

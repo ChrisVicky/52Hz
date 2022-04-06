@@ -9,6 +9,7 @@ package com.example._52hz.controller;
 import com.example._52hz.entity.User;
 import com.example._52hz.service.ConfService;
 import com.example._52hz.service.LogService;
+import com.example._52hz.service.MsgService;
 import com.example._52hz.util.APIResponse;
 import com.example._52hz.util.ErrorCode;
 import com.example._52hz.util.IpHelper;
@@ -38,6 +39,9 @@ public class DevController {
     @Resource
     ConfService confService;
 
+    @Resource
+    MsgService msgService;
+
     @GetMapping("/ip")
     public APIResponse getIpAddress(){
 
@@ -63,7 +67,16 @@ public class DevController {
         return logService.classicLogin(account, password, httpSession);
     }
 
+    @PostMapping("/send/msg")
+    public APIResponse sendMsg(@RequestParam("msg") String msg,
+                               HttpSession httpSession){
+        return msgService.sendMsg(msg, httpSession);
+    }
 
+    @GetMapping("/get/my/msg")
+    public APIResponse myMsg(HttpSession httpSession){
+        return msgService.getMyMsg(httpSession);
+    }
 
 
 

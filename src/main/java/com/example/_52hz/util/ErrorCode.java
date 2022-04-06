@@ -30,6 +30,8 @@ public enum ErrorCode {
     SESSION_ERROR(1007,"Session Error."),
     MULTIPLE_CONFESSIONS_ERROR(1008, "You have Multiple Confessions, Error, Please Contact Developers."),
     HAD_CONFESSION_BEFORE_ERROR(1009, "You have Confession before, Please Delete it before You make a new one."),
+    NOT_MATCHED_YET_CANNOT_MSG(1010, "You have not been matched yet, So no msg can be sent"),
+    NOT_YOUR_PARTNER(1011, "Not Your Partner, So no msg should you send to that person."),
     PARAMETER_ERROR(2000,"Parameter Error"),
     PURSUIT_TARGET_NULL(2001, "None Pursuit Target Got"),
     ADD_CONFESSION_ERROR(3000,"Add Confession Failed"),

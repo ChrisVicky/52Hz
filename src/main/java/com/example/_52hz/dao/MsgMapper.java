@@ -15,19 +15,19 @@ public interface MsgMapper {
     @Select("select * from msg where m_id = #{m_id}")
     Msg getMsgByMsyId(@Param("m_id") Integer m_id);
 
-    @Select("select * from msg where sender = #{sender}")
+    @Select("select * from msg where sender = #{sender} and is_deleted=0")
     List<Msg> getMsgListBySender(@Param("sender") Integer sender);
 
-    @Select("select * from msg where receiver = #{receiver}")
+    @Select("select * from msg where receiver = #{receiver} and is_deleted=0")
     List<Msg> getMsgListByReceiver(@Param("receiver") Integer receiver);
 
     @Select("select * from msg where sender = #{sender} and receiver = #{receiver}")
     List<Msg> getMsgListBySenderAndReceiver(@Param("sender") Integer sender,@Param("receiver") Integer receiver);
 
     @Insert("insert into msg (`sender`,`receiver`,`msg`,`created_at`)" +
-            "values (#{sender},#{receiver},#{msg},#{created_at}")
+            "values (#{sender},#{receiver},#{msg},#{created_at})")
     int insertMsg(@Param("sender") Integer sender, @Param("receiver") Integer receiver,
-                  @Param("msg")    String msg,     @Param("created_at") Time createdAt);
+                  @Param("msg")    String msg,     @Param("created_at") String createdAt);
 
     @Update("update msg set msg=#{msg} where m_id=#{m_id}")
     void updateMsg(@Param("m_id") Integer m_id,@Param("msg") String msg);
