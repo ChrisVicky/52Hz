@@ -67,17 +67,6 @@ public class DevController {
         return logService.classicLogin(account, password, httpSession);
     }
 
-    @PostMapping("/send/msg")
-    public APIResponse sendMsg(@RequestParam("msg") String msg,
-                               HttpSession httpSession){
-        return msgService.sendMsg(msg, httpSession);
-    }
-
-    @GetMapping("/get/my/msg")
-    public APIResponse myMsg(HttpSession httpSession){
-        return msgService.getMyMsg(httpSession);
-    }
-
 
 
 

@@ -45,7 +45,7 @@ public interface BufferMapper {
     @Select("SELECT * FROM buffer b WHERE b.u_id = #{u_id} AND b.is_deleted = 0;")
     List<Buffer> getUndeletedBufferByUid(@Param("u_id") Integer u_id);
 
-    @Update("UPDATE buffer set is_matched=1, update_at=#{updated_at} WHERE b_id=#{b_id}")
+    @Update("UPDATE buffer set is_matched=1, updated_at=#{updated_at} WHERE b_id=#{b_id}")
     int matchBuffer(@Param("b_id") Integer b_id, @Param("updated_at") String updated_at);
 
     @Select("SELECT is_matched FROM buffer WHERE b_id=#{b_id}")
