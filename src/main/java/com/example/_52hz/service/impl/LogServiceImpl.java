@@ -11,8 +11,7 @@ import com.example._52hz.util.ErrorCode;
 import com.example._52hz.util.TwtLoginResponse;
 import com.example._52hz.util.TwtUser;
 import okhttp3.*;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.jdbc.Null;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -21,7 +20,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
-import tk.mybatis.mapper.genid.GenId;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;

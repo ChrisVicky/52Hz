@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 7070
 
 spring:
   datasource:
@@ -7,14 +7,9 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       filters: wall, stat
-      #      url: jdbc:mysql://123.56.84.177:3306/twt_vote?serverTimezone=Asia/Shanghai&characterEncoding=UTF-8
-      #      url: jdbc:mysql://82.157.130.23:3306/twt_vote?serverTimezone=Asia/Shanghai&characterEncoding=UTF-8 # Justin Xiao's
       url: jdbc:mysql://8.141.166.181:3306/52Hz?serverTimezone=Asia/Shanghai&characterEncoding=UTF-8 # Christopher's
-#      url: jdbc:mysql://127.0.0.1:3306/twt_vote?serverTimezone=Asia/Shanghai&characterEncoding=UTF-8 # Local
       username: twt_vote
       password: TWT_vote1895
-#      username: root
-#      password: 123
       initial-size: 5
       min-idle: 1
       max-active: 10
