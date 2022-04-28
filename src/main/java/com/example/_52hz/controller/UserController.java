@@ -1,12 +1,10 @@
 package com.example._52hz.controller;
 
+import com.example._52hz.service.BLService;
 import com.example._52hz.service.ConfService;
 import com.example._52hz.service.UserService;
 import com.example._52hz.util.APIResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
@@ -18,15 +16,50 @@ import javax.servlet.http.HttpSession;
  * @create: 2022-03-31 16:02
  */
 @RestController
+@RequestMapping("/api")
 public class UserController {
     @Resource
     UserService userService;
     @Resource
     ConfService confService;
 
-    @GetMapping("/api/getUserByStuNumber")
+    @Resource
+    BLService blService;
+
+    @GetMapping("/getUserByStuNumber")
     public APIResponse getUserByStuNumber(@RequestParam("stuNumber") String stuNumber){
         return userService.getUserByStuNumber(stuNumber);
     }
 
+    // NICKNAME
+    @PostMapping("/setMyNickname")
+    public APIResponse setMyNickName(@RequestParam("nickname") String nickname,
+                                     HttpSession session){
+        return userService.setMyNickName(nickname, session);
+    }
+
+    @GetMapping("/getMyNickname")
+    public APIResponse getMyNickname(HttpSession session){
+        return userService.getMyNickName(session);
+    }
+
+
+
+    // BackList
+    @PostMapping("/addBlackList")
+    public APIResponse addBlackList(@RequestParam Integer b_u_id,
+                                    HttpSession session){
+        return blService.addBackList(b_u_id, session);
+    }
+
+    @PostMapping("/deleteBlackList")
+    public APIResponse deleteBlackList(@RequestParam Integer b_u_id,
+                                       HttpSession session){
+        return blService.deletedFromBL(b_u_id, session);
+    }
+
+    @GetMapping("/getMyBlackList")
+    public APIResponse getMyBlackList(HttpSession session){
+        return blService.getMyBL(session);
+    }
 }

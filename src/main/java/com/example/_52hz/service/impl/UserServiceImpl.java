@@ -1,6 +1,8 @@
 package com.example._52hz.service.impl;
 
+import com.example._52hz.dao.NicknameMapper;
 import com.example._52hz.dao.UserMapper;
+import com.example._52hz.entity.Nickname;
 import com.example._52hz.entity.User;
 import com.example._52hz.service.UserService;
 import com.example._52hz.util.APIResponse;
@@ -8,6 +10,7 @@ import com.example._52hz.util.ErrorCode;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -20,6 +23,9 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     @Resource
     UserMapper userMapper;
+
+    @Resource
+    NicknameMapper nicknameMapper;
 
     @Override
     public APIResponse getUserByStuNumber(String stuNumber){
@@ -35,6 +41,50 @@ public class UserServiceImpl implements UserService {
         }catch (Exception e){
             e.printStackTrace();
             return APIResponse.error(ErrorCode.SERVICE_ERROR, e.getMessage());
+        }
+    }
+
+    @Override
+    public APIResponse setMyNickName(String nickname, HttpSession session) {
+        try{
+            User user = (User) session.getAttribute("user");
+            if(user==null){
+                return APIResponse.error(ErrorCode.NOT_LOGIN_YET);
+            }
+
+            List<Nickname> checkList = nicknameMapper.getCheckList(nickname);
+            if(!checkList.isEmpty()){
+                return APIResponse.error(ErrorCode.NICKNAME_TAKEN);
+            }
+
+            List<Nickname> nicknameList = nicknameMapper.getMyNickName(user.getU_id());
+            if(nicknameList.isEmpty()){
+                nicknameMapper.addNewNickName(user.getU_id(), nickname);
+            }else{
+                nicknameMapper.updateMyNickName(user.getU_id(), nickname);
+            }
+            return APIResponse.success("Nickname Set");
+        }catch (Exception e){
+            e.printStackTrace();
+            return APIResponse.error(ErrorCode.SERVICE_ERROR);
+        }
+    }
+
+    @Override
+    public APIResponse getMyNickName(HttpSession session){
+        try{
+            User user = (User) session.getAttribute("user");
+            if(user==null){
+                return APIResponse.error(ErrorCode.NOT_LOGIN_YET);
+            }
+            List<Nickname> nicknameList = nicknameMapper.getMyNickName(user.getU_id());
+            if(nicknameList.isEmpty()){
+                return APIResponse.error(ErrorCode.NO_NICK_NAME_YET);
+            }
+            return APIResponse.success(nicknameList.get(0));
+        }catch (Exception e){
+            e.printStackTrace();
+            return APIResponse.error(ErrorCode.SERVICE_ERROR);
         }
     }
 }

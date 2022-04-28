@@ -3,6 +3,7 @@ package com.example._52hz.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.example._52hz.config.RestTemplateConfig;
+import com.example._52hz.dao.FMsgMapper;
 import com.example._52hz.dao.UserMapper;
 import com.example._52hz.entity.User;
 import com.example._52hz.service.LogService;
@@ -40,6 +41,9 @@ public class LogServiceImpl implements LogService {
 
     @Resource
     RestTemplate restTemplate;
+
+    @Resource
+    FMsgMapper fMsgMapper;
 
     @Resource
     UserMapper userMapper;
@@ -90,6 +94,17 @@ public class LogServiceImpl implements LogService {
                     ft.format(date),            ft.format(date),
                     twtUser.getMajor(),         twtUser.getDepartment(),
                     twtUser.getCampus(), 0);
+            // UPDATE USER FMSG
+            User user = userMapper.getUserByStuNumber(twtUser.getUserNumber()).get(0);
+            if(user.getWechat()!=null){
+                fMsgMapper.updateRIdWithWechat(user.getU_id(), user.getWechat());
+            }
+            if(user.getStu_number()!=null){
+                fMsgMapper.updateRIdWithStuNumber(user.getU_id(), user.getStu_number());
+            }
+            if(user.getPhone()!=null){
+                fMsgMapper.updateRIdWithPhone(user.getU_id(), user.getPhone());
+            }
         }else {
             // Update user information
             userMapper.updateUserWhenLogin(
@@ -98,6 +113,7 @@ public class LogServiceImpl implements LogService {
                     twtUser.getEmail(), grade,
                     twtUser.getUserNumber(), ft.format(date));
         }
+
         return userMapper.getUserByStuNumber(twtUser.getUserNumber()).get(0);
     }
 

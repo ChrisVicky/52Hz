@@ -7,24 +7,22 @@ package com.example._52hz.controller;
  */
 
 import com.example._52hz.entity.User;
-import com.example._52hz.service.ConfService;
-import com.example._52hz.service.LogService;
-import com.example._52hz.service.MsgService;
+import com.example._52hz.service.*;
 import com.example._52hz.util.APIResponse;
 import com.example._52hz.util.ErrorCode;
 import com.example._52hz.util.IpHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.security.PublicKey;
 
 /**
  * @program: _52Hz
  * @description: For developer
- * @author: 作者名字
+ * @author: Christopher
  * @create: 2022-03-29 00:23
  */
 @RestController
@@ -67,12 +65,11 @@ public class DevController {
         return logService.classicLogin(account, password, httpSession);
     }
 
-
-
-
-
     @PostMapping("/back/door")
     public APIResponse logBack(@RequestParam("stu_number") String stu_number, HttpSession session){
         return logService.logBack(stu_number, session);
     }
+
+
+
 }
