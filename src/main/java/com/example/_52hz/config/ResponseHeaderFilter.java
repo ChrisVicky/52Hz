@@ -24,7 +24,7 @@ public class ResponseHeaderFilter extends OncePerRequestFilter {
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, HEAD");
         response.setHeader("Access-Control-Allow-Headers", "Origin");
-        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Origin", "localhost:7070");
         filterChain.doFilter(request,response);
     }
 }
