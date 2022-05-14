@@ -7,6 +7,7 @@ import com.example._52hz.util.APIResponse;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -26,6 +27,10 @@ public class UserController {
     @Resource
     BLService blService;
 
+    @GetMapping("/whoAmI")
+    public APIResponse getWhoAmI(HttpSession httpSession){
+        return userService.whoAmI(httpSession);
+    }
     @GetMapping("/getUserByStuNumber")
     public APIResponse getUserByStuNumber(@RequestParam("stuNumber") String stuNumber){
         return userService.getUserByStuNumber(stuNumber);
@@ -61,5 +66,10 @@ public class UserController {
     @GetMapping("/getMyBlackList")
     public APIResponse getMyBlackList(HttpSession session){
         return blService.getMyBL(session);
+    }
+
+    @PostMapping("/getNickName")
+    public APIResponse getNickName(@RequestParam Integer u_id){
+        return userService.getNickName(u_id);
     }
 }

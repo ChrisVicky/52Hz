@@ -40,6 +40,7 @@ public enum ErrorCode {
     NO_NICK_NAME_YET(2005, "You have not yet set a nick name"),
     FMSG_ID_NOT_ERROR(2006, "FMsg Id InValid"),
     NOT_YOUR_MSG(2007, "Not your msg"),
+    MULTIPLE_NICK_NAME(2008, "Multiple Nick Name"),
     ADD_CONFESSION_ERROR(3000,"Add Confession Failed"),
     DELETE_CONFESSION_ERROR(3001,"Delete Confession Failed"),
     UPDATE_CONFESSION_ERROR(3002,"Update Confession Failed"),

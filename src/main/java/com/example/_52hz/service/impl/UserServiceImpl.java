@@ -28,6 +28,15 @@ public class UserServiceImpl implements UserService {
     NicknameMapper nicknameMapper;
 
     @Override
+    public APIResponse whoAmI(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if(user==null){
+            return APIResponse.error(ErrorCode.NOT_LOGIN_YET);
+        }
+        return APIResponse.success(user);
+    }
+
+    @Override
     public APIResponse getUserByStuNumber(String stuNumber){
         try{
             List<User>userList = userMapper.getUserByStuNumber(stuNumber);
@@ -85,6 +94,23 @@ public class UserServiceImpl implements UserService {
         }catch (Exception e){
             e.printStackTrace();
             return APIResponse.error(ErrorCode.SERVICE_ERROR);
+        }
+    }
+
+    @Override
+    public APIResponse getNickName(Integer u_id){
+        try{
+            List<Nickname> nicknameList = nicknameMapper.getMyNickName(u_id);
+            if(nicknameList.isEmpty()){
+                return APIResponse.error(ErrorCode.NO_NICK_NAME_YET);
+            }
+            if(nicknameList.size() > 1){
+                return APIResponse.error(ErrorCode.MULTIPLE_NICK_NAME);
+            }
+            return APIResponse.success(nicknameList.get(0));
+        }catch (Exception e){
+            e.printStackTrace();
+                   return APIResponse.error(ErrorCode.SERVICE_ERROR);
         }
     }
 }

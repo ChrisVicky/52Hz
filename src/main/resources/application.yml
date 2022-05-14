@@ -13,6 +13,22 @@ spring:
       initial-size: 5
       min-idle: 1
       max-active: 10
+  thymeleaf:
+    prefix: classpath:/templates/
+    cache: false
+    encoding: utf-8
+    suffix: .html
+  mvc:
+    throw-exception-if-no-handler-found: true
+    dispatch-options-request: true
+    static-path-pattern: /static/**
+  web:
+    resources:
+      static-locations: classpath:/static/,/templates/
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
 
 mybatis:
   type-aliases-package: com.example._52hz.entity
