@@ -8,6 +8,9 @@ import java.util.List;
 @Mapper
 //@Component
 public interface UserMapper {
+    @Select("SELECT * FROM user WHERE u_id=#{u_id}")
+    List<User> getUserByUId(@Param("u_id") String u_id);
+
     @Select("SELECT * FROM user WHERE stu_number = #{stu_number};")
     List<User> getUserByStuNumber(@Param("stu_number") String stu_number);
 
@@ -56,6 +59,7 @@ public interface UserMapper {
     //通过用户学生卡号获取relationshipID
     @Select("SELECT relationship_id FROM user WHERE user.stu_number = #{stu_number};")
     Integer getRelationIdByStuNumber(@Param("stu_number") String stu_number);
+
 
     @Select("SELECT u_id FROM user WHERE phone=#{phone} and is_deleted=0;")
     List<Integer> getUIdByPhone(@Param("phone") String phone);

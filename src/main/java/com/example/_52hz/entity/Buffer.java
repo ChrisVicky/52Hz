@@ -40,6 +40,7 @@ public class Buffer {
     private String msg; /* Text */
 
     private String updated_at; /**/
+    private String created_at; /**/
 
     private Integer is_deleted; /* default --> 0 */
     private Integer is_matched; /* default --> 0 */

@@ -56,7 +56,7 @@ public class MsgServiceImpl implements MsgService {
             }
             int u_id = userList.get(0).getU_id();
             Date date = new Date();
-            SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             msgMapper.insertMsg(user.getU_id(), u_id, msg, ft.format(date));
             return APIResponse.success("Msg Inserted.");
         }catch (Exception e){

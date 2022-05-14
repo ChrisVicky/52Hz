@@ -7,7 +7,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       filters: wall, stat
-      url: jdbc:mysql://8.141.166.181:3306/52Hz?serverTimezone=Asia/Shanghai&characterEncoding=UTF-8 # Christopher's
+      url: jdbc:mysql://8.141.166.181:3306/52Hz?serverTimezone=UTC&characterEncoding=UTF-8 # Christopher's
       username: twt_vote
       password: TWT_vote1895
       initial-size: 5

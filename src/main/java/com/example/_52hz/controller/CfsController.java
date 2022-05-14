@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @program: _52Hz
@@ -19,6 +20,7 @@ public class CfsController {
     @Resource
     ConfService confService;
 
+    private ReentrantLock lock = new ReentrantLock();
 
     @PostMapping("/addConfession")
     public APIResponse addConfession(HttpSession session,    @RequestParam String stu_number,
@@ -26,12 +28,22 @@ public class CfsController {
                                      @RequestParam String wechat,   @RequestParam String u_name,
                                      @RequestParam String gender,   @RequestParam String grade,
                                      @RequestParam String email,    @RequestParam String msg) {
-        return confService.addConfession(session,stu_number,phone,qq,wechat,u_name,gender,grade,email,msg);
+        lock.lock();
+        try{
+            return confService.addConfession(session,stu_number,phone,qq,wechat,u_name,gender,grade,email,msg);
+        }finally {
+            lock.unlock();
+        }
     }
 
     @PostMapping("/deleteConfession")
     public APIResponse deleteConfession(HttpSession session) {
-        return confService.deleteConfession(session);
+        lock.lock();
+        try{
+            return confService.deleteConfession(session);
+        }finally {
+            lock.unlock();
+        }
     }
 
     @PostMapping("/updateConfession")

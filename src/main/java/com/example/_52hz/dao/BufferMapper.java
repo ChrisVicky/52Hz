@@ -11,14 +11,14 @@ import java.util.List;
 public interface BufferMapper {
     //新建buffer
     @Insert("insert into buffer (u_id,stu_number,phone,qq,wechat,u_name,gender," +
-            "grade,email,msg,updated_at) values (#{u_id},#{stu_number},#{phone}," +
-            "#{qq},#{wechat},#{u_name},#{gender},#{grade},#{email},#{msg},#{updated_at})")
+            "grade,email,msg,updated_at,created_at) values (#{u_id},#{stu_number},#{phone}," +
+            "#{qq},#{wechat},#{u_name},#{gender},#{grade},#{email},#{msg},#{updated_at},#{created_at})")
     int insertBuffer(@Param("u_id") Integer u_id,       @Param("stu_number") String stu_number,
                      @Param("phone") String phone,      @Param("qq") String qq,
                      @Param("wechat") String wechat,    @Param("u_name") String u_name,
                      @Param("gender") String gender,    @Param("grade") String grade,
                      @Param("email") String email,      @Param("msg") String msg,
-                     @Param("updated_at")String updated_at );
+                     @Param("updated_at")String updated_at, @Param("created_at") String created_at );
 
     //根据b_id更新msg和updated_at
     @Update("UPDATE buffer SET msg=#{msg},updated_at=#{updated_at} where b_id=#{b_id}")
@@ -38,7 +38,7 @@ public interface BufferMapper {
     @Select("SELECT * FROM buffer b WHERE b.u_id = #{u_id} AND b.is_deleted = 0;")
     List<Buffer> getBufferByUid(@Param("u_id") Integer u_id);
 
-    @Select("SELECT * FROM buffer b WHERE b.u_id = #{u_id} AND b.is_matched = 0;")
+    @Select("SELECT * FROM buffer b WHERE b.u_id = #{u_id} AND b.is_matched = 0 AND b.is_deleted=0;")
     List<Buffer> getUnMatchedBufferByUid(@Param("u_id") Integer u_id);
 
     // Get Information

@@ -84,7 +84,7 @@ public class LogServiceImpl implements LogService {
         String grade = twtUser.getStuType().charAt(0) + "20" + (twtUser.getUserNumber().substring(2,4));
         // convert Date
         Date date = new Date();
-        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if(userList.isEmpty()){
             // New here
             userMapper.insertNewUser(

@@ -29,8 +29,9 @@ public class FMsgController {
                                       @RequestParam String stu_number,
                                       @RequestParam String phone,
                                       @RequestParam String wechat,
+                                      @RequestParam String sender_id,
                                       HttpSession httpSession){
-        return fConfService.addMsg(msg, stu_number, phone, wechat, httpSession);
+        return fConfService.addMsg(msg, stu_number, phone, wechat, sender_id, httpSession);
     }
 
     @GetMapping("/getMySentFConfession")

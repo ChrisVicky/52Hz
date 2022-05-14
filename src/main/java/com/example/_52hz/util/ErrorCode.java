@@ -41,6 +41,7 @@ public enum ErrorCode {
     FMSG_ID_NOT_ERROR(2006, "FMsg Id InValid"),
     NOT_YOUR_MSG(2007, "Not your msg"),
     MULTIPLE_NICK_NAME(2008, "Multiple Nick Name"),
+    LOVE_CONFESSION_RECEIVER_IS_YOURSELF(2009, "Love Confession may be sent to the sender"),
     ADD_CONFESSION_ERROR(3000,"Add Confession Failed"),
     DELETE_CONFESSION_ERROR(3001,"Delete Confession Failed"),
     UPDATE_CONFESSION_ERROR(3002,"Update Confession Failed"),
