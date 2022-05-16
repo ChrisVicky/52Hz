@@ -150,7 +150,7 @@ public class ConfServiceImpl implements ConfService {
             // convert Date
             Date date = new Date();
             SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            System.out.println(ft.format(date));
+//            System.out.println(ft.format(date));
             bufferMapper.insertBuffer(u_id, stu_number, phone, qq, wechat, u_name, gender, grade, email, msg, ft.format(date), ft.format(date));
 
             // Then we begin our match

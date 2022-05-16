@@ -100,7 +100,7 @@ public class XiaotangServiceImpl implements XiaotangService {
                 }
             }
 
-            System.out.println(user);
+//            System.out.println(user);
             Date date = new Date();
             SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

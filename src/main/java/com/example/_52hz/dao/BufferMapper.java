@@ -30,7 +30,7 @@ public interface BufferMapper {
 
 
     //通过RelationShipId获取表白信息
-    @Select("SELECT b_id,u_id,stu_number,phone,qq,wechat,u_name,gender,grade,email,msg,updated_at,b.is_deleted" +
+    @Select("SELECT b_id,u_id,stu_number,phone,qq,wechat,u_name,gender,grade,email,msg,updated_at,created_at,b.is_deleted" +
             " FROM buffer b INNER JOIN relationship r  ON b.b_id = r.b_id_1 OR b.b_id = r.b_id_2 WHERE r.r_id = #{r_id} ;")
     List<Buffer> getBuffersByRid(@Param("r_id") Integer r_id);
 

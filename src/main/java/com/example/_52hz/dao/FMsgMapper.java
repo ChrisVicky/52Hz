@@ -46,6 +46,18 @@ public interface FMsgMapper {
     void addMsgWithId(@Param("sender") Integer sender, @Param("r_id") Integer r_id,
                       @Param("msg") String msg, @Param("created_at") String created_at);
 
+    @Insert("INSERT INTO fMsg (sender, msg, r_id, r_stu_number, created_at) VALUES " +
+            "(#{sender},#{msg}, #{r_id}, #{r_stu_number},#{created_at})")
+    void addMsgWithIdStuNumber(@Param("sender") Integer sender, @Param("r_id") Integer r_id, @Param("r_stu_number") String r_stu_number,
+                               @Param("msg") String msg, @Param("created_at") String created_at);
+
+    @Insert("INSERT INTO fMsg (sender, msg, r_id, r_stu_number, r_wechat, r_phone, created_at) VALUES " +
+            "(#{sender},#{msg}, #{r_id}, #{r_stu_number},#{r_wechat}, #{r_phone},#{created_at})")
+    void addMsgWithAll(@Param("sender") Integer sender, @Param("r_id") Integer r_id,
+                       @Param("r_stu_number") String r_stu_number, @Param("r_wechat") String r_wechat,
+                               @Param("r_phone") String r_phone,
+                               @Param("msg") String msg, @Param("created_at") String created_at);
+
     @Update("UPDATE fMsg SET is_read = 1 WHERE fm_id <= #{latest_id} AND r_id = #{u_id} AND sender = #{sender}")
     void setRead(@Param("latest_id") Integer latest_id, @Param("u_id") Integer u_id, @Param("sender") Integer sender);
 }

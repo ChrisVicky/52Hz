@@ -49,6 +49,7 @@ public class FConfServiceImpl implements FConfService {
             List<User> userList;
             // Check Information, Could be Invalid
             if(stu_number.length()!=0){
+//                System.out.println("stu_number: " + stu_number);
                 userList = userMapper.getUserByStuNumber(stu_number);
             }else if(phone.length()!=0){
                 userList = userMapper.getUserByPhone(phone);
@@ -72,9 +73,9 @@ public class FConfServiceImpl implements FConfService {
             if(userList.size()>1){
                 return APIResponse.error(ErrorCode.MULTIPLE_USER);
             }
-            // Get it.
+            // Get it. Add as much information as possible
             target = userList.get(0);
-            fMsgMapper.addMsgWithId(me.getU_id(), target.getU_id(), msg, ft.format(date));
+            fMsgMapper.addMsgWithAll(me.getU_id(), target.getU_id(), target.getStu_number(), target.getWechat(), target.getPhone(), msg, ft.format(date));
             return APIResponse.success("MSG SENT");
         }catch (Exception e){
             e.printStackTrace();
