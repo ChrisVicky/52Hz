@@ -1,5 +1,6 @@
 server:
-  port: 7070
+  port: 8080
+#  port: 7070 # on Ali cloud
 
 spring:
   datasource:
