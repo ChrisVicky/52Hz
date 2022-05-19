@@ -2,11 +2,15 @@ package com.example._52hz.controller;
 
 import com.example._52hz.service.ConfService;
 import com.example._52hz.util.APIResponse;
+import org.apache.tomcat.jni.Time;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static java.lang.Thread.sleep;
 
 /**
  * @program: _52Hz
@@ -30,8 +34,15 @@ public class CfsController {
                                      @RequestParam String email,    @RequestParam String msg) {
         lock.lock();
         try{
+//            Date date = new Date();
+//            sleep(10);
+//            System.out.println(date);
+//            System.out.println("Test Lock" + stu_number);
+//            date = new Date();
+//            System.out.println(date);
             return confService.addConfession(session,stu_number,phone,qq,wechat,u_name,gender,grade,email,msg);
-        }finally {
+        }
+        finally {
             lock.unlock();
         }
     }

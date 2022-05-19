@@ -27,11 +27,12 @@ public class FMsgController {
     @PostMapping("/addFriendshipConfession")
     public APIResponse addFConfession(@RequestParam String msg,
                                       @RequestParam String stu_number,
+                                      @RequestParam String u_name,
                                       @RequestParam String phone,
                                       @RequestParam String wechat,
                                       @RequestParam String sender_id,
                                       HttpSession httpSession){
-        return fConfService.addMsg(msg, stu_number, phone, wechat, sender_id, httpSession);
+        return fConfService.addMsg(msg, stu_number, u_name, phone, wechat, sender_id, httpSession);
     }
 
     @GetMapping("/getMySentFConfession")

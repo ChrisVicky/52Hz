@@ -35,5 +35,7 @@ public interface MsgMapper {
     @Update("update msg set is_deleted = 1 where m_id=#{m_id}")
     void deleteMsg(@Param("m_id")Integer m_id);
 
+    @Update("UPDATE msg set is_deleted = 1 WHERE (sender=#{id1} AND receiver=#{id2}) OR (sender=#{id2} AND receiver=#{id1})")
+    void deleteMsgByRelationship(@Param("id1") Integer id1, @Param("id2") Integer id2);
 
 }

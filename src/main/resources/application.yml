@@ -8,9 +8,12 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       filters: wall, stat
-      url: jdbc:mysql://8.141.166.181:3306/52Hz?serverTimezone=UTC&characterEncoding=UTF-8 # Christopher's
-      username: twt_vote
-      password: TWT_vote1895
+#      url: jdbc:mysql://8.141.166.181:3306/52Hz?serverTimezone=UTC&characterEncoding=UTF-8 # Christopher's
+#      username: twt_vote
+#      password: TWT_vote1895
+      url: jdbc:mysql://172.19.135.196:8888/edu_twt_52hz?serverTimezone=GMT%2b8&characterEncoding=UTF-8&character_set_server=utf8mb4&useUnicode=true
+      username: edu_twt_52hz
+      password: oPAwXN2hwXOEXUEK
       initial-size: 5
       min-idle: 1
       max-active: 10

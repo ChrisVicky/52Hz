@@ -35,7 +35,7 @@ public class FConfServiceImpl implements FConfService {
 
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
-    public APIResponse addMsg(String msg, String stu_number, String phone, String wechat, String senderId,HttpSession session) {
+    public APIResponse addMsg(String msg, String stu_number, String u_name, String phone, String wechat, String senderId,HttpSession session) {
         lock.lock();
         try{
             // convert Date
@@ -64,7 +64,7 @@ public class FConfServiceImpl implements FConfService {
                 // The Target haven't joined our system yet.
                 // This kind of error shall be done at his initial Login.
                 fMsgMapper.addOneMsgWithoutId(me.getU_id(), wechat, phone, stu_number, msg, ft.format(date));
-                return APIResponse.success("MSG SENT, BUT THIS Target has never logged in OUR 52Hz");
+                return APIResponse.success("MSG SENT, BUT the Target has never logged in OUR 52Hz");
             }
             if(userList.contains(me)){
                 return APIResponse.error(ErrorCode.LOVE_CONFESSION_RECEIVER_IS_YOURSELF);
@@ -75,7 +75,10 @@ public class FConfServiceImpl implements FConfService {
             }
             // Get it. Add as much information as possible
             target = userList.get(0);
-            fMsgMapper.addMsgWithAll(me.getU_id(), target.getU_id(), target.getStu_number(), target.getWechat(), target.getPhone(), msg, ft.format(date));
+            if(u_name.length()==0 || u_name.equals(target.getU_name()))
+                fMsgMapper.addMsgWithAll(me.getU_id(), target.getU_id(), target.getStu_number(), target.getWechat(), target.getPhone(), msg, ft.format(date));
+            else
+                return APIResponse.error(ErrorCode.NAME_NOT_PAIRED);
             return APIResponse.success("MSG SENT");
         }catch (Exception e){
             e.printStackTrace();

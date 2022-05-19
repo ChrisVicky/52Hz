@@ -50,4 +50,7 @@ public interface BufferMapper {
 
     @Select("SELECT is_matched FROM buffer WHERE b_id=#{b_id}")
     Integer getIsMatchedByBId(@Param("b_id") Integer b_id);
+
+    @Select("SELECT * FROM buffer WHERE b_id=#{b_id}")
+    Buffer getBufferByBId(@Param("b_id") Integer b_id);
 }

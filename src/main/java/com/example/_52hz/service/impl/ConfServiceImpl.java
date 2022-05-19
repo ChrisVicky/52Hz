@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.example._52hz.config.RestTemplateConfig;
 import com.example._52hz.dao.BufferMapper;
+import com.example._52hz.dao.MsgMapper;
 import com.example._52hz.dao.RelationshipMapper;
 import com.example._52hz.dao.UserMapper;
 import com.example._52hz.entity.Buffer;
@@ -16,6 +17,7 @@ import com.example._52hz.util.TwtUser;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.lang.Thread.sleep;
+
 @Service
 public class ConfServiceImpl implements ConfService {
 
@@ -41,6 +45,8 @@ public class ConfServiceImpl implements ConfService {
     @Resource
     RelationshipMapper relationshipMapper;
 
+    @Resource
+    MsgMapper msgMapper;
 
 
     private ReentrantLock lock = new ReentrantLock();
@@ -138,7 +144,6 @@ public class ConfServiceImpl implements ConfService {
             }else{
                 return APIResponse.error(ErrorCode.PURSUIT_TARGET_NULL);
             }
-//            System.out.println(u_id);
             // Check if the sender is myself
             if(!uIdList.isEmpty() && uIdList.contains(user.getU_id())){
                 // Love msg may be sent to the sender.
@@ -152,7 +157,7 @@ public class ConfServiceImpl implements ConfService {
             SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //            System.out.println(ft.format(date));
             bufferMapper.insertBuffer(u_id, stu_number, phone, qq, wechat, u_name, gender, grade, email, msg, ft.format(date), ft.format(date));
-
+            sleep(10);
             // Then we begin our match
             if(uIdList.isEmpty()){
                 // Target have never ever logged in.
@@ -164,12 +169,14 @@ public class ConfServiceImpl implements ConfService {
             // 2. Get new Target's Uid By Buffer
             // 3. Check is Match
             for(Integer uId : uIdList){
+//                System.out.println("Uid: "  + uId);
                 List<Buffer> bufferList = bufferMapper.getUnMatchedBufferByUid(uId);
                 if(bufferList.isEmpty()) {
                     continue;
                 }
                 List<User> userList = getTargetUserByBuffer(bufferList.get(0));
                 if(userList!=null && userList.contains(user)){
+//                    System.out.println(stu_number + " MATCHED");
                     // MATCH!!!
                     // 1. Set New Relationship
                     Integer bid1 = bufferList.get(0).getB_id();
@@ -198,7 +205,6 @@ public class ConfServiceImpl implements ConfService {
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     public APIResponse deleteConfession(HttpSession session) {
-        lock.lock();
         try {
 
             User user = (User) session.getAttribute("user");
@@ -226,6 +232,12 @@ public class ConfServiceImpl implements ConfService {
                 }
                 Relationship relationship = relationshipList.get(0);
                 Integer anotherBId = relationship.getB_id_1() + relationship.getB_id_2() - b_id;
+                Buffer anotherBuffer = bufferMapper.getBufferByBId(anotherBId);
+                if(anotherBuffer==null) {
+                    return APIResponse.error(ErrorCode.SERVICE_ERROR);
+                }
+                // Delete Msg Sent by each other
+                msgMapper.deleteMsgByRelationship(buffer.getU_id(), anotherBuffer.getU_id());
                 // Delete Buffer
                 Date date = new Date();
                 SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -235,6 +247,9 @@ public class ConfServiceImpl implements ConfService {
                 relationshipMapper.deleteRelationshipByRId(relationship.getR_id());
                 // Delete User's Is_Match
                 userMapper.deleteRelationshipId(relationship.getR_id());
+
+
+
             }else{
                 // Not Matched, Delete Buffer only
                 Date date = new Date();
@@ -245,8 +260,6 @@ public class ConfServiceImpl implements ConfService {
         } catch (Exception e) {
             e.printStackTrace();
             return APIResponse.error(ErrorCode.DELETE_CONFESSION_ERROR);
-        }finally {
-            lock.unlock();
         }
     }
 

@@ -47,6 +47,7 @@ public enum ErrorCode {
     UPDATE_CONFESSION_ERROR(3002,"Update Confession Failed"),
     USER_SEARCH_ERROR(3003,"User Search Error"),
     USER_NOT_EXISTS(3004, "User Not Exists"),
+    NAME_NOT_PAIRED(30010, "Name and Stu_number not in pair"),
     SERVICE_ERROR(5000, "Service Error"),
     NO_CONFESSION_ERROR(5001,"User No Confession Error"),
     MATCHED_NULL_USER_ERROR(5002,"信息提供有错或对方未注册"),
