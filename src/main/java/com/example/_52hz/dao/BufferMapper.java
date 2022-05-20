@@ -31,7 +31,7 @@ public interface BufferMapper {
 
     //通过RelationShipId获取表白信息
     @Select("SELECT b_id,u_id,stu_number,phone,qq,wechat,u_name,gender,grade,email,msg,updated_at,created_at,b.is_deleted" +
-            " FROM buffer b INNER JOIN relationship r  ON b.b_id = r.b_id_1 OR b.b_id = r.b_id_2 WHERE r.r_id = #{r_id} ;")
+            " FROM buffer b INNER JOIN relationship r  ON b.b_id = r.b_id_1 OR b.b_id = r.b_id_2 WHERE r.r_id = #{r_id} AND r.is_deleted=0 ;")
     List<Buffer> getBuffersByRid(@Param("r_id") Integer r_id);
 
     //通过u_id获取buffer
@@ -48,9 +48,9 @@ public interface BufferMapper {
     @Update("UPDATE buffer set is_matched=1, updated_at=#{updated_at} WHERE b_id=#{b_id}")
     int matchBuffer(@Param("b_id") Integer b_id, @Param("updated_at") String updated_at);
 
-    @Select("SELECT is_matched FROM buffer WHERE b_id=#{b_id}")
+    @Select("SELECT is_matched FROM buffer WHERE b_id=#{b_id} AND is_deleted=0")
     Integer getIsMatchedByBId(@Param("b_id") Integer b_id);
 
-    @Select("SELECT * FROM buffer WHERE b_id=#{b_id}")
+    @Select("SELECT * FROM buffer WHERE b_id=#{b_id} AND is_deleted=0")
     Buffer getBufferByBId(@Param("b_id") Integer b_id);
 }

@@ -11,19 +11,19 @@ import java.util.List;
 * */
 @Mapper
 public interface FMsgMapper {
-    @Select("select * from fMsg where fm_id = #{fm_id}")
+    @Select("select * from fMsg where fm_id = #{fm_id} AND is_deleted=0")
     FMsg getMsgByFMsyId(@Param("fm_id") Integer fm_id);
 
-    @Select("SELECT * FROM fMsg WHERE sender = #{sender}")
+    @Select("SELECT * FROM fMsg WHERE sender = #{sender} AND is_deleted = 0")
     List<FMsg> getMsgBySender(@Param("sender") Integer sender);
 
-    @Select("SELECT * FROM fMsg WHERE r_id = #{r_id} ")
+    @Select("SELECT * FROM fMsg WHERE r_id = #{r_id} AND is_deleted=0")
     List<FMsg> getMsgByR(@Param("r_id") Integer r_id);
 
-    @Select("SELECT * FROM fMsg WHERE r_id = #{r_id} AND sender NOT IN (SELECT b_u_id FROM blackList WHERE u_id = #{r_id} AND blackList.is_deleted = 0);")
+    @Select("SELECT * FROM fMsg WHERE r_id = #{r_id} AND is_deleted=0 AND sender NOT IN (SELECT b_u_id FROM blackList WHERE u_id = #{r_id} AND blackList.is_deleted = 0);")
     List<FMsg> getMsgByRWithBL(@Param("r_id") Integer r_id);
 
-    @Select("SELECT * FROM fMsg WHERE r_id = #{r_id} AND fMsg.is_read = 0 AND sender NOT IN (SELECT b_u_id FROM blackList WHERE u_id = #{r_id} AND blackList.is_deleted = 0);")
+    @Select("SELECT * FROM fMsg WHERE r_id = #{r_id} AND is_deleted=0 AND fMsg.is_read = 0 AND sender NOT IN (SELECT b_u_id FROM blackList WHERE u_id = #{r_id} AND blackList.is_deleted = 0);")
     List<FMsg> getMsgByRWithBLandReadFlag(@Param("r_id") Integer r_id);
 
     @Update("UPDATE fMsg SET r_id = #{r_id} WHERE r_wechat = #{r_wechat}")

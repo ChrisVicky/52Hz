@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper
 public interface MsgMapper {
 
-    @Select("select * from msg where m_id = #{m_id}")
+    @Select("select * from msg where m_id = #{m_id} AND is_deleted=0")
     Msg getMsgByMsyId(@Param("m_id") Integer m_id);
 
     @Select("select * from msg where sender = #{sender} and is_deleted=0")
@@ -21,7 +21,7 @@ public interface MsgMapper {
     @Select("select * from msg where receiver = #{receiver} and is_deleted=0")
     List<Msg> getMsgListByReceiver(@Param("receiver") Integer receiver);
 
-    @Select("select * from msg where sender = #{sender} and receiver = #{receiver}")
+    @Select("select * from msg where sender = #{sender} and receiver = #{receiver} AND is_deleted=0")
     List<Msg> getMsgListBySenderAndReceiver(@Param("sender") Integer sender,@Param("receiver") Integer receiver);
 
     @Insert("insert into msg (`sender`,`receiver`,`msg`,`created_at`)" +
