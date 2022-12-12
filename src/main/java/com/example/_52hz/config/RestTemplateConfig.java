@@ -16,8 +16,10 @@ import java.time.Duration;
 @Configuration
 public class RestTemplateConfig {
     private static String domain = "52Hz.twt.edu.cn";
-    private static String single_url = "https://api.twt.edu.cn/api/user/single";
-    private static String post_url = "https://api.twt.edu.cn/api/auth/common";
+    private static String single_url = "http://202.113.13.171:8080/api/user/single";
+    private static String post_url = "http://202.113.13.171:8080/api/auth/common";
+//    private static String post_url = "https://api.twt.edu.cn/api/auth/common";
+
     private static String ticket = "NTJIei5jNWFlZjI0MTEzYzk2Y2JiNGVmZmZkN2Y0YmNlY2M0MmNhZmExYmRi";
     public static String getDomain(){return domain;}
     public static String getTicket(){return ticket;}
